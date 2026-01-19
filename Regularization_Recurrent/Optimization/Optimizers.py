@@ -37,6 +37,7 @@ class Adam(Optimizer):
         self.m = self.beta1 * self.m + (1 - self.beta1) * gradients 
 
         #second moment ( uncentered variance )
+        #gradient magnitude → adaptive step size
         self.v = self.beta2 * self.v + (1 - self.beta2) * (gradients ** 2)  
 
         # bias-corrected moments
@@ -52,11 +53,10 @@ class SgdWithMomentum(Optimizer):
     def __init__(self, learning_rate, momentum):
         super().__init__()
         self.lr = learning_rate
-        self.momentum = momentum
+        self.momentum = momentum # it is momentum factor, corresponds to mass in physics ( mv = p)
         self.velocity = None
 
     def calculate_update(self, weights, gradients):
-        # Apply weight decay if regularizer is set
         if self.regularizer is not None:
             regularizer_gradient = self.regularizer.calculate_gradient(weights)
             weights = weights - self.lr * regularizer_gradient
@@ -64,7 +64,7 @@ class SgdWithMomentum(Optimizer):
         if self.velocity is None:
             self.velocity = np.zeros_like(weights)
 
-        # update velocity
+        # update velocity, old velocity is multiplied by momentum factor ( like friction ) and current gradient is added
         self.velocity = self.momentum * self.velocity + self.lr * gradients
 
         # update weights
